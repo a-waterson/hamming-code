@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "command_line.h": "c",
+        "config.h": "c",
+        "environment.h": "c",
+        "common.h": "c",
+        "chrono": "c",
+        "algorithm": "c"
+    }
+}

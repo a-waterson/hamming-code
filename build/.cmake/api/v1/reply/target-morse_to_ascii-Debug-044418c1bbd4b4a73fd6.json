@@ -1,0 +1,481 @@
+{
+	"artifacts" : 
+	[
+		{
+			"path" : "src/morse_to_ascii"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_executable",
+			"target_link_directories",
+			"target_link_libraries",
+			"target_compile_options",
+			"add_compile_definitions",
+			"target_include_directories",
+			"target_compile_features"
+		],
+		"files" : 
+		[
+			"src/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 13,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 29,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 54,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 55,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 56,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 57,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 58,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 59,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 39,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 40,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 41,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 42,
+				"parent" : 0
+			},
+			{
+				"command" : 4,
+				"file" : 0,
+				"line" : 1,
+				"parent" : 0
+			},
+			{
+				"command" : 5,
+				"file" : 0,
+				"line" : 25,
+				"parent" : 0
+			},
+			{
+				"command" : 6,
+				"file" : 0,
+				"line" : 38,
+				"parent" : 0
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "-g"
+				},
+				{
+					"backtrace" : 9,
+					"fragment" : "-g"
+				},
+				{
+					"backtrace" : 10,
+					"fragment" : "-fstack-protector-all"
+				},
+				{
+					"backtrace" : 10,
+					"fragment" : "-ftrapv"
+				},
+				{
+					"backtrace" : 11,
+					"fragment" : "-Wpedantic"
+				},
+				{
+					"backtrace" : 11,
+					"fragment" : "-Wall"
+				},
+				{
+					"backtrace" : 11,
+					"fragment" : "-Wextra"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wdouble-promotion"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wformat-nonliteral"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wformat-security"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wformat-y2k"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wnull-dereference"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Winit-self"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wmissing-include-dirs"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wswitch-default"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wswitch-enum"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wunused-local-typedefs"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wstrict-overflow=5"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wmissing-noreturn"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Walloca"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wfloat-equal"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wdeclaration-after-statement"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wshadow"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wpointer-arith"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wabsolute-value"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wundef"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wexpansion-to-defined"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wunused-macros"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wno-endif-labels"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wbad-function-cast"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wcast-qual"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wwrite-strings"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wconversion"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wdangling-else"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wdate-time"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wempty-body"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wsign-conversion"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wfloat-conversion"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Waggregate-return"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wstrict-prototypes"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wold-style-definition"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wmissing-prototypes"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wmissing-declarations"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wpacked"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wredundant-decls"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wnested-externs"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Winline"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Winvalid-pch"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wlong-long"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wvariadic-macros"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wdisabled-optimization"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wstack-protector"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Woverlength-strings"
+				},
+				{
+					"fragment" : "-std=c11"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 13,
+					"define" : "_POSIX_C_SOURCE=200809L"
+				},
+				{
+					"backtrace" : 13,
+					"define" : "_XOPEN_SOURCE=700"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 14,
+					"path" : "/home/aidanw/work/COMP3980/assignment1/src/../include"
+				}
+			],
+			"language" : "C",
+			"languageStandard" : 
+			{
+				"backtraces" : 
+				[
+					15
+				],
+				"standard" : "11"
+			},
+			"sourceIndexes" : 
+			[
+				0,
+				1
+			]
+		}
+	],
+	"id" : "morse_to_ascii::@145eef247bfb46b6828c",
+	"link" : 
+	{
+		"commandFragments" : 
+		[
+			{
+				"fragment" : "-g",
+				"role" : "flags"
+			},
+			{
+				"fragment" : "",
+				"role" : "flags"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "-L/usr/local/lib",
+				"role" : "libraryPath"
+			},
+			{
+				"fragment" : "-Wl,-rpath,/usr/local/lib",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-lm",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "/usr/local/lib/libdc_error.so",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 4,
+				"fragment" : "/usr/local/lib/libdc_posix.so",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "/usr/local/lib/libdc_util.so",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 6,
+				"fragment" : "/usr/local/lib/libdc_fsm.so",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 7,
+				"fragment" : "/usr/local/lib/libdc_application.so",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 8,
+				"fragment" : "/usr/local/lib/libconfig.so",
+				"role" : "libraries"
+			}
+		],
+		"language" : "C"
+	},
+	"name" : "morse_to_ascii",
+	"nameOnDisk" : "morse_to_ascii",
+	"paths" : 
+	{
+		"build" : "src",
+		"source" : "src"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0,
+				1
+			]
+		},
+		{
+			"name" : "Header Files",
+			"sourceIndexes" : 
+			[
+				2
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/common.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/main_to_ascii.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "include/common.h",
+			"sourceGroupIndex" : 1
+		}
+	],
+	"type" : "EXECUTABLE"
+}
