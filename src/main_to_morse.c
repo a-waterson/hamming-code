@@ -32,11 +32,26 @@ const uint8_t MASK_00100000 = UINT8_C(0x00000020);
 const uint8_t MASK_01000000 = UINT8_C(0x00000040);
 const uint8_t MASK_10000000 = UINT8_C(0x00000080);
 
-static const uint8_t masks_8[] = {
-    MASK_10000000, MASK_01000000, MASK_00100000, MASK_00010000,
-    MASK_00001000, MASK_00000100, MASK_00000010, MASK_00000001,
+const uint16_t MASK_00000001_00000000 = UINT16_C(0x00000100);
+const uint16_t MASK_00000010_00000000 = UINT16_C(0x00000200);
+const uint16_t MASK_00000100_00000000 = UINT16_C(0x00000400);
+const uint16_t MASK_00001000_00000000 = UINT16_C(0x00000800);
+const uint16_t MASK_00010000_00000000 = UINT16_C(0x00001000);
+const uint16_t MASK_00100000_00000000 = UINT16_C(0x00002000);
+const uint16_t MASK_01000000_00000000 = UINT16_C(0x00004000);
+const uint16_t MASK_10000000_00000000 = UINT16_C(0x00008000);
+
+static const uint16_t masks_16[] = {
+    MASK_10000000_00000000, MASK_01000000_00000000, MASK_00100000_00000000,
+    MASK_00010000_00000000, MASK_00001000_00000000, MASK_00000100_00000000,
+    MASK_00000010_00000000, MASK_00000001_00000000, MASK_10000000,
+    MASK_01000000,          MASK_00100000,          MASK_00010000,
+    MASK_00001000,          MASK_00000100,          MASK_00000010,
+    MASK_00000001,
 };
 
+void writeFileContent(uint16_t *codeword, uint16_t fileContents[],
+                      size_t index);
 void toHamming(struct dc_application_settings *settings, bool input[8],
                bool output[16], const struct dc_posix_env *env,
                struct dc_error *err);
@@ -54,7 +69,7 @@ static void error_reporter(const struct dc_error *err);
 static void trace_reporter(const struct dc_posix_env *env,
                            const char *file_name, const char *function_name,
                            size_t line_number);
-void computeParity(bool *output);
+void computeParityBits(bool *output);
 int main(int argc, char *argv[])
 {
     dc_posix_tracer tracer;
@@ -176,10 +191,12 @@ static int run(const struct dc_posix_env *env, struct dc_error *err,
 
     inputToBinary(chars, (size_t)strlen(chars), env, err, settings);
 }
+
 void inputToBinary(char *input, size_t len, const struct dc_posix_env *env,
                    struct dc_error *err,
                    struct dc_application_settings *settings)
 {
+    uint16_t fileContent[12] = {0};
     for (size_t i = 0; i < len - 1; i++)
     {
         uint8_t item;
@@ -190,15 +207,10 @@ void inputToBinary(char *input, size_t len, const struct dc_posix_env *env,
 
         bool bits[8];
         bool bits16[16] = {false};
-        char binary[9];
-        char binary16[17];
         item = (uint8_t)input[i];
 
         // takes character and converts to binary representation array of bools
         dc_to_binary8(env, item, bits);
-
-        // dc_to_printable_binary8(env, bits, binary);
-        // dc_write(env, err, STDOUT_FILENO, binary, sizeof(binary));
 
         // here we take bits[8] and convert it to 16 bits so we can use
         // from_binary16. start by computing our hamming code.
@@ -207,13 +219,28 @@ void inputToBinary(char *input, size_t len, const struct dc_posix_env *env,
         toHamming(settings, bits, bits16, env, err);
 
         dc_from_binary16(env, bits16, ptr16);
-        // printf("%d\n", sizeof(item16));
-        dc_to_binary16(env, item16, bits16);
-        dc_to_printable_binary16(env, bits16, binary16);
-        printf("%s\n", binary16);
+
+        // printf("%s\n", binary16);
+        writeFileContent(ptr16, fileContent, i);
+        // dc_write(env, err, STDOUT_FILENO, ptr16, 2);
+    }
+    for (size_t i = 0; i < 12; i++)
+    {
+        uint16_t *ptr = &fileContent[i];
+        dc_write(env, err, STDOUT_FILENO, ptr, 2);
     }
 }
-
+void writeFileContent(uint16_t *codeword, uint16_t fileContents[], size_t index)
+{
+    for (size_t i = 0; i < 12; i++)
+    {
+        uint16_t masked = ((fileContents[i] | (*codeword & masks_16[i])));
+        uint16_t aligned = (masked << i);
+        uint16_t indexed = (aligned >> index);
+        fileContents[i] |= indexed;
+    }
+}
+// convert bool array to 16 bit with parity bits at indices 8-11
 void toHamming(struct dc_application_settings *settings, bool input[8],
                bool output[16], const struct dc_posix_env *env,
                struct dc_error *err)
@@ -222,33 +249,25 @@ void toHamming(struct dc_application_settings *settings, bool input[8],
     {
         output[i] = input[i];
     }
-    // pad out 16 bit array
-
-    computeParity(output);
-    for (size_t i = 0; i < 16; i++)
-    {
-        printf("%d", output[i]);
-    }
-    printf("\n");
+    computeParityBits(output);
 }
-void computeParity(bool *output)
+void computeParityBits(bool *data)
 {
-    if ((output[0] + output[1] + output[3] + output[4] + output[6]) % 2)
+    if ((data[0] + data[1] + data[3] + data[4] + data[6]) % 2)
     {
-        output[8] = true;
+        data[8] = true;
     }
-
-    if ((output[0] + output[2] + output[3] + output[5] + output[6]) % 2)
+    if ((data[0] + data[2] + data[3] + data[5] + data[6]) % 2)
     {
-        output[9] = true;
+        data[9] = true;
     }
-    if ((output[1] + output[2] + output[3] + output[7]) % 2)
+    if ((data[1] + data[2] + data[3] + data[7]) % 2)
     {
-        output[10] = true;
+        data[10] = true;
     }
-    if ((output[4] + output[5] + output[6] + output[7]) % 2)
+    if ((data[4] + data[5] + data[6] + data[7]) % 2)
     {
-        output[11] = true;
+        data[11] = true;
     }
 }
 
