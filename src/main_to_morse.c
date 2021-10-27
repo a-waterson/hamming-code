@@ -6,6 +6,7 @@
 #include <dc_application/defaults.h>
 #include <dc_application/environment.h>
 #include <dc_application/options.h>
+#include <dc_posix/dc_fcntl.h>
 #include <dc_posix/dc_stdlib.h>
 #include <dc_posix/dc_string.h>
 #include <dc_posix/dc_unistd.h>
@@ -13,8 +14,8 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
-
 #define BUF_SIZE 1024
 
 struct application_settings
@@ -50,8 +51,10 @@ static const uint16_t masks_16[] = {
     MASK_00000001,
 };
 
-void writeFileContent(uint16_t *codeword, uint16_t fileContents[],
-                      size_t index);
+int *createFiles(int fd[], const struct dc_posix_env *env, struct dc_error *err,
+                 struct dc_application_settings *settings, const char *prefix);
+void writeFileContent(const uint16_t *codeword, uint16_t fileContents[],
+                      uint16_t index);
 void toHamming(struct dc_application_settings *settings, bool input[8],
                bool output[16], const struct dc_posix_env *env,
                struct dc_error *err);
@@ -137,9 +140,10 @@ static struct dc_application_settings *create_settings(
 
     return (struct dc_application_settings *)settings;
 }
-void inputToBinary(char *input, size_t inputsize,
-                   const struct dc_posix_env *env, struct dc_error *err,
-                   struct dc_application_settings *settings);
+void inputToBinary(char *input, size_t len, const struct dc_posix_env *env,
+                   struct dc_error *err,
+                   struct dc_application_settings *settings, const char *prefix,
+                   const char *parity);
 static int destroy_settings(const struct dc_posix_env *env,
                             __attribute__((unused)) struct dc_error *err,
                             struct dc_application_settings **psettings)
@@ -171,9 +175,10 @@ static int run(const struct dc_posix_env *env, struct dc_error *err,
     app_settings = (struct application_settings *)settings;
     parity = dc_setting_string_get(env, app_settings->parity);
     prefix = dc_setting_string_get(env, app_settings->prefix);
-    // printf("%s\n%s\n", prefix, parity);
+    printf("%s\n%s\n", prefix, parity);
 
-    char chars[BUF_SIZE] = {0};
+    char chars[BUF_SIZE];
+
     ssize_t nread;
     int ret_val;
 
@@ -189,24 +194,27 @@ static int run(const struct dc_posix_env *env, struct dc_error *err,
         }
     }
 
-    inputToBinary(chars, (size_t)strlen(chars), env, err, settings);
+    inputToBinary(chars, (size_t)strlen(chars), env, err, app_settings, prefix,
+                  parity);
 }
 
 void inputToBinary(char *input, size_t len, const struct dc_posix_env *env,
                    struct dc_error *err,
-                   struct dc_application_settings *settings)
+                   struct dc_application_settings *settings, const char *prefix,
+                   const char *parity)
 {
+    int fds[12];
     uint16_t fileContent[12] = {0};
-    for (size_t i = 0; i < len - 1; i++)
+    uint8_t fileContentPrintable[12] = {0};
+    uint8_t *ptr;
+    for (uint16_t i = 0; i < len - 1; i++)
     {
         uint8_t item;
-
         uint16_t item16;
         uint16_t *ptr16;
         ptr16 = &item16;
-
         bool bits[8];
-        bool bits16[16] = {false};
+        bool bits16[16];
         item = (uint8_t)input[i];
 
         // takes character and converts to binary representation array of bools
@@ -221,20 +229,44 @@ void inputToBinary(char *input, size_t len, const struct dc_posix_env *env,
         dc_from_binary16(env, bits16, ptr16);
 
         // printf("%s\n", binary16);
+
         writeFileContent(ptr16, fileContent, i);
         // dc_write(env, err, STDOUT_FILENO, ptr16, 2);
     }
+
+    createFiles(fds, env, err, settings, prefix);
+
     for (size_t i = 0; i < 12; i++)
     {
-        uint16_t *ptr = &fileContent[i];
-        dc_write(env, err, STDOUT_FILENO, ptr, 2);
+        int fd = fds[i];
+        fileContentPrintable[i] = (fileContent[i] >> 8);
+        ptr = &fileContentPrintable[i];
+        dc_write(env, err, fd, ptr, 1);
+        dc_close(env, err, fd);
     }
 }
-void writeFileContent(uint16_t *codeword, uint16_t fileContents[], size_t index)
+int *createFiles(int fds[], const struct dc_posix_env *env,
+                 struct dc_error *err, struct dc_application_settings *settings,
+                 const char *prefix)
 {
-    for (size_t i = 0; i < 12; i++)
+    int fd;
+    char filename[100] = "";
+    for (int i = 0; i < 12; i++)
     {
-        uint16_t masked = ((fileContents[i] | (*codeword & masks_16[i])));
+        sprintf(filename, "%s%d.hamming", prefix, i);
+        fd = dc_open(env, err, filename, DC_O_CREAT | DC_O_TRUNC | DC_O_WRONLY,
+                     S_IRUSR | S_IWUSR);
+        fds[i] = fd;
+    }
+    return fds;
+}
+void writeFileContent(const uint16_t *codeword, uint16_t fileContents[],
+                      uint16_t index)
+{
+    uint16_t i;
+    for (i = 0; i < 12; i++)
+    {
+        uint16_t masked = (*codeword & masks_16[i]);
         uint16_t aligned = (masked << i);
         uint16_t indexed = (aligned >> index);
         fileContents[i] |= indexed;
