@@ -1,5 +1,3 @@
-
-
 #include <ctype.h>
 #include <dc_application/command_line.h>
 #include <dc_application/config.h>
@@ -57,7 +55,7 @@ void writeFileContent(const uint16_t *codeword, uint16_t fileContents[],
                       uint16_t index);
 void toHamming(struct dc_application_settings *settings, bool input[8],
                bool output[16], const struct dc_posix_env *env,
-               struct dc_error *err);
+               struct dc_error *err, const char *parity);
 static struct dc_application_settings *create_settings(
     const struct dc_posix_env *env, struct dc_error *err);
 
@@ -72,7 +70,7 @@ static void error_reporter(const struct dc_error *err);
 static void trace_reporter(const struct dc_posix_env *env,
                            const char *file_name, const char *function_name,
                            size_t line_number);
-void computeParityBits(bool *output);
+void computeParityBits(bool *output, const char *parity);
 int main(int argc, char *argv[])
 {
     dc_posix_tracer tracer;
@@ -213,8 +211,8 @@ void inputToBinary(char *input, size_t len, const struct dc_posix_env *env,
         uint16_t item16;
         uint16_t *ptr16;
         ptr16 = &item16;
-        bool bits[8];
-        bool bits16[16];
+        bool bits[8] = {false};
+        bool bits16[16] = {false};
         item = (uint8_t)input[i];
 
         // takes character and converts to binary representation array of bools
@@ -224,7 +222,7 @@ void inputToBinary(char *input, size_t len, const struct dc_posix_env *env,
         // from_binary16. start by computing our hamming code.
         // toHamming should take both bool arrays [8] and [16]
         // and compute our hamming code, modifying a ptr
-        toHamming(settings, bits, bits16, env, err);
+        toHamming(settings, bits, bits16, env, err, parity);
 
         dc_from_binary16(env, bits16, ptr16);
 
@@ -275,29 +273,29 @@ void writeFileContent(const uint16_t *codeword, uint16_t fileContents[],
 // convert bool array to 16 bit with parity bits at indices 8-11
 void toHamming(struct dc_application_settings *settings, bool input[8],
                bool output[16], const struct dc_posix_env *env,
-               struct dc_error *err)
+               struct dc_error *err, const char *parity)
 {
     for (size_t i = 0; i < sizeof(input) / sizeof(input[0]); i++)
     {
         output[i] = input[i];
     }
-    computeParityBits(output);
+    computeParityBits(output, parity);
 }
-void computeParityBits(bool *data)
+void computeParityBits(bool *data, const char *parity)
 {
-    if ((data[0] + data[1] + data[3] + data[4] + data[6]) % 2)
+    if (((data[0] + data[1] + data[3] + data[4] + data[6]) % 2) != 0)
     {
         data[8] = true;
     }
-    if ((data[0] + data[2] + data[3] + data[5] + data[6]) % 2)
+    if (((data[0] + data[2] + data[3] + data[5] + data[6]) % 2) != 0)
     {
         data[9] = true;
     }
-    if ((data[1] + data[2] + data[3] + data[7]) % 2)
+    if (((data[1] + data[2] + data[3] + data[7]) % 2) != 0)
     {
         data[10] = true;
     }
-    if ((data[4] + data[5] + data[6] + data[7]) % 2)
+    if (((data[4] + data[5] + data[6] + data[7]) % 2) != 0)
     {
         data[11] = true;
     }

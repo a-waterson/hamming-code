@@ -12,6 +12,7 @@
 #include <dc_posix/dc_unistd.h>
 #include <dc_util/bits.h>
 #include <getopt.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -50,9 +51,10 @@ static const uint16_t masks_16[] = {
     MASK_00001000,          MASK_00000100,          MASK_00000010,
     MASK_00000001,
 };
-
-int *createFiles(int fd[], const struct dc_posix_env *env, struct dc_error *err,
-                 struct dc_application_settings *settings, const char *prefix);
+void validateCodeword(bool *codeword, const char *parity);
+void checkParity(bool codeword[], const char *parity);
+int *readFiles(int fd[], const struct dc_posix_env *env, struct dc_error *err,
+               struct dc_application_settings *settings, const char *prefix);
 void writeFileContent(const uint16_t *codeword, uint16_t fileContents[],
                       uint16_t index);
 void toHamming(struct dc_application_settings *settings, bool input[8],
@@ -181,130 +183,106 @@ static int run(const struct dc_posix_env *env, struct dc_error *err,
 
     ssize_t nread;
     int ret_val;
-    //
     // open all the files and store each of their data in a buffer
-    //
-    while ((nread = dc_read(env, err, STDIN_FILENO, chars, BUF_SIZE)) > 0)
-    {
-        if (dc_error_has_error(err))
-        {
-            return 1;
-        }
-        if (dc_error_has_error(err))
-        {
-            ret_val = 2;
-        }
-    }
-
-    inputToBinary(chars, (size_t)strlen(chars), env, err, app_settings, prefix,
-                  parity);
-}
-
-void inputToBinary(char *input, size_t len, const struct dc_posix_env *env,
-                   struct dc_error *err,
-                   struct dc_application_settings *settings, const char *prefix,
-                   const char *parity)
-{
     int fds[12];
     uint16_t fileContent[12] = {0};
     uint8_t fileContentPrintable[12] = {0};
     uint8_t *ptr;
-    for (uint16_t i = 0; i < len - 1; i++)
-    {
-        uint8_t item;
-        uint16_t item16;
-        uint16_t *ptr16;
-        ptr16 = &item16;
-        bool bits[8];
-        bool bits16[16];
-        item = (uint8_t)input[i];
-
-        // takes character and converts to binary representation array of bools
-        dc_to_binary8(env, item, bits);
-
-        // here we take bits[8] and convert it to 16 bits so we can use
-        // from_binary16. start by computing our hamming code.
-        // toHamming should take both bool arrays [8] and [16]
-        // and compute our hamming code, modifying a ptr
-        toHamming(settings, bits, bits16, env, err);
-
-        dc_from_binary16(env, bits16, ptr16);
-
-        // printf("%s\n", binary16);
-
-        writeFileContent(ptr16, fileContent, i);
-        // dc_write(env, err, STDOUT_FILENO, ptr16, 2);
-    }
-
-    createFiles(fds, env, err, settings, prefix);
-
+    bool data[12][8] = {false};
+    bool data2[8][16] = {false};
+    readFiles(fds, env, err, settings, prefix);
+    // write to 8 bit buffer
     for (size_t i = 0; i < 12; i++)
     {
         int fd = fds[i];
-        fileContentPrintable[i] = (fileContent[i] >> 8);
+        fileContentPrintable[i];
         ptr = &fileContentPrintable[i];
-        dc_write(env, err, fd, ptr, 1);
+        dc_read(env, err, fd, ptr, 1);
         dc_close(env, err, fd);
     }
+    // convert to matrix of bools
+
+    for (int i = 0; i < 12; i++)
+    {
+        dc_to_binary8(env, fileContentPrintable[i], data[i]);
+    }
+    for (size_t i = 0; i < 8; i++)
+    {
+        for (size_t j = 0; j < 12; j++)
+        {
+            data2[i][j] = data[j][i];
+        }
+    }
+    for (size_t i = 0; i < 8; i++)
+    {
+        validateCodeword(data2[i], parity);
+    }
 }
-int *createFiles(int fds[], const struct dc_posix_env *env,
-                 struct dc_error *err, struct dc_application_settings *settings,
-                 const char *prefix)
+void validateCodeword(bool *data, const char *parity)
+{
+    bool parityval;
+    parityval = !strcmp(parity, "odd");
+    int errorCount = 0;
+    bool data1 = data[0];
+    bool data2 = data[1];
+    bool data3 = data[2];
+    bool data4 = data[3];
+    bool data5 = data[4];
+    bool data6 = data[5];
+    bool data7 = data[6];
+    bool data8 = data[7];
+    bool p1 = data[8];
+    bool p2 = data[9];
+    bool p3 = data[10];
+    bool p4 = data[11];
+    bool pbits[4] = {data[8], data[9], data[10], data[11]};
+
+    if (((data[0] + data[1] + data[3] + data[4] + data[6] + data[8]) % 2) !=
+        parityval)
+    {
+        errorCount += 1;
+        p1 = !p1;
+    }
+    // check second parity bit
+    if (((data[0] + data[2] + data[3] + data[5] + data[6] + data[9]) % 2) !=
+        parityval)
+    {
+        errorCount += 1;
+        p2 = !p2;
+    }
+    // check third parity bit
+    if (((data[1] + data[2] + data[3] + data[7] + data[10]) % 2) != parityval)
+    {
+        errorCount += 1;
+        p3 = !p3;
+    }
+    // check fourth parity bit
+    if (((data[4] + data[5] + data[6] + data[7] + data[11]) % 2) != parityval)
+    {
+        errorCount += 1;
+        p4 = !p4;
+    }
+    if (errorCount != 0)
+    {
+        bool reversedCodeword[12] = {data[7], data[6], data[5], data[4],
+                                     p4,      data[3], data[2], data[1],
+                                     p3,      data[0], p2,      p1};
+    }
+}
+void checkParity(bool codeword[], const char *parity) {}
+int *readFiles(int fds[], const struct dc_posix_env *env, struct dc_error *err,
+               struct dc_application_settings *settings, const char *prefix)
 {
     int fd;
-    char filename[100] = "";
+    char filename[BUF_SIZE] = "";
     for (int i = 0; i < 12; i++)
     {
         sprintf(filename, "%s%d.hamming", prefix, i);
-        fd = dc_open(env, err, filename, DC_O_CREAT | DC_O_TRUNC | DC_O_WRONLY,
-                     S_IRUSR | S_IWUSR);
+        fd = dc_open(env, err, filename, DC_O_RDONLY, S_IRUSR);
         fds[i] = fd;
     }
     return fds;
 }
-void writeFileContent(const uint16_t *codeword, uint16_t fileContents[],
-                      uint16_t index)
-{
-    uint16_t i;
-    for (i = 0; i < 12; i++)
-    {
-        uint16_t masked = (*codeword & masks_16[i]);
-        uint16_t aligned = (masked << i);
-        uint16_t indexed = (aligned >> index);
-        fileContents[i] |= indexed;
-    }
-}
-// convert bool array to 16 bit with parity bits at indices 8-11
-void toHamming(struct dc_application_settings *settings, bool input[8],
-               bool output[16], const struct dc_posix_env *env,
-               struct dc_error *err)
-{
-    for (size_t i = 0; i < sizeof(input) / sizeof(input[0]); i++)
-    {
-        output[i] = input[i];
-    }
-    computeParityBits(output);
-}
-void computeParityBits(bool *data)
-{
-    if ((data[0] + data[1] + data[3] + data[4] + data[6]) % 2)
-    {
-        data[8] = true;
-    }
-    if ((data[0] + data[2] + data[3] + data[5] + data[6]) % 2)
-    {
-        data[9] = true;
-    }
-    if ((data[1] + data[2] + data[3] + data[7]) % 2)
-    {
-        data[10] = true;
-    }
-    if ((data[4] + data[5] + data[6] + data[7]) % 2)
-    {
-        data[11] = true;
-    }
-}
-
 static void error_reporter(const struct dc_error *err)
 {
     fprintf(stderr, "ERROR: %s : %s : @ %zu : %d\n", err->file_name,
