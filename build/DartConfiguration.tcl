@@ -4,17 +4,17 @@
 
 
 # Configuration directories and files
-SourceDirectory: /home/aidanw/work/COMP3980/assignment1
-BuildDirectory: /home/aidanw/work/COMP3980/assignment1/build
+SourceDirectory: /Users/aidanwaterson/CSTTERM3/COMP3980/hamming-code
+BuildDirectory: /Users/aidanwaterson/CSTTERM3/COMP3980/hamming-code/build
 
 # Where to place the cost data store
 CostDataFile: 
 
 # Site is something like machine.domain, i.e. pragmatic.crd
-Site: aidan-ms7c02
+Site: Aidans-MacBook-Pro.local
 
 # Build name is osname-revision-compiler, i.e. Linux-2.4.2-2smp-c++
-BuildName: Linux-x86_64-pc-linux-gnu-gcc-11.1.0
+BuildName: Darwin-clang++
 
 # Subprojects
 LabelsForSubprojects: 
@@ -26,8 +26,8 @@ SubmitURL: http://
 NightlyStartTime: 00:00:00 EDT
 
 # Commands for the build/test/submit cycle
-ConfigureCommand: "/usr/bin/cmake" "/home/aidanw/work/COMP3980/assignment1"
-MakeCommand: /usr/bin/cmake --build . --config "${CTEST_CONFIGURATION_TYPE}"
+ConfigureCommand: "/usr/local/Cellar/cmake/3.21.2/bin/cmake" "/Users/aidanwaterson/CSTTERM3/COMP3980/hamming-code"
+MakeCommand: /usr/local/Cellar/cmake/3.21.2/bin/cmake --build . --config "${CTEST_CONFIGURATION_TYPE}"
 DefaultCTestConfigurationType: Release
 
 # version control
@@ -44,7 +44,7 @@ SVNOptions:
 SVNUpdateOptions: 
 
 # Git options
-GITCommand: /usr/bin/git
+GITCommand: /usr/local/bin/git
 GITInitSubmodules: 
 GITUpdateOptions: 
 GITUpdateCustom: 
@@ -57,12 +57,12 @@ P4UpdateOptions:
 P4UpdateCustom: 
 
 # Generic update command
-UpdateCommand: /usr/bin/git
+UpdateCommand: /usr/local/bin/git
 UpdateOptions: 
 UpdateType: git
 
 # Compiler info
-Compiler: 
+Compiler: /usr/bin/clang++
 CompilerVersion: 
 
 # Dynamic analysis (MemCheck)
@@ -75,7 +75,7 @@ CudaSanitizerCommand:
 CudaSanitizerCommandOptions: 
 MemoryCheckType: 
 MemoryCheckSanitizerOptions: 
-MemoryCheckCommand: /usr/bin/valgrind
+MemoryCheckCommand: /usr/local/bin/valgrind
 MemoryCheckCommandOptions: 
 MemoryCheckSuppressionFile: 
 
